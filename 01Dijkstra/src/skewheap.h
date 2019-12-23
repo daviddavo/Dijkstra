@@ -1,6 +1,8 @@
 #pragma once
 #include <iterator>
 
+class EmptyHeapException {};
+
 template <class K, class V>
 class SkewHeap {
     public:
@@ -16,12 +18,6 @@ class SkewHeap {
             	Node(K key, V val) :
             		_key(key), _val(val), _left(nullptr), _right(nullptr) {}
 
-            	~Node() {
-            		if (_left != nullptr) delete _left;
-            		if (_right != nullptr) delete _right;
-            		_left = _right = nullptr;
-            	}
-
                 K getKey() const { return _key; }
                 V getVal() const { return _val; }
 
@@ -33,15 +29,19 @@ class SkewHeap {
         SkewHeap() : _root(nullptr) {}
 
         ~SkewHeap() {
-        	delete _root;
-        	_root = nullptr;
+            if (_root != nullptr) {
+                deleteHeap(_root);
+                _root = nullptr;
+            }
         }
 
         Node * getMin() const {
+            if (_root == nullptr) throw EmptyHeapException();
         	return _root;
         }
 
         void deleteMin() {
+            if (_root == nullptr) throw EmptyHeapException();
         	auto aux = _root;
         	_root = join(aux->_left, aux->_right);
         	delete aux;
@@ -58,6 +58,14 @@ class SkewHeap {
         }
     private:
         Node * _root;
+
+        static void deleteHeap(Node * node) {
+            if (node->_left != nullptr) deleteHeap(node->_left);
+            if (node->_right != nullptr) deleteHeap(node->_right);
+            node->_left = node->_right = nullptr;
+            
+            delete node;
+        }
 
         static Node * join(Node * n1, Node * n2) {
 			if (n1 == nullptr) return n2;

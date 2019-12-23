@@ -10,6 +10,10 @@ protected:
 
 class TestInsert : public :: TestSkewHeap {};
 
+TEST_F(TestInsert, Vacio) {
+    ASSERT_THROW(_vacio.getMin(), EmptyHeapException);
+}
+
 TEST_F(TestInsert, Increasing) {
 	for (int i = 0; i <= 10; ++i) {
 		_vacio.insert(i, i);
