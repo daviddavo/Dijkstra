@@ -2,7 +2,7 @@ stages:
     - build
     - test
 
-build:
+build dijkstra:
     stage: build
     image: alpine
     tags:
@@ -12,12 +12,12 @@ build:
             - build
     artifacts:
         paths:
-            - build/alltest
+            - 01Dijkstra/build/alltest
     before_script:
         - apk add git python python3 gcc g++ clang make cmake
     script:
-        - mkdir -p build
-        - cd build
+        - mkdir -p 01Dijkstra/build
+        - cd 01Dijkstra/build
         - cmake ..
         - make
 
@@ -29,4 +29,4 @@ test:
     before_script:
         - apk add clang
     script:
-        - build/alltest
+        - 01Dijkstra/build/alltest
