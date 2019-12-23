@@ -1,0 +1,32 @@
+stages:
+    - build
+    - test
+
+build:
+    stage: build
+    image: alpine
+    tags:
+        - docker
+    cache:
+        paths:
+            - build
+    artifacts:
+        paths:
+            - build/alltest
+    before_script:
+        - apk add git python python3 gcc g++ clang make cmake
+    script:
+        - mkdir -p build
+        - cd build
+        - cmake ..
+        - make
+
+test:
+    stage: test
+    image: alpine
+    tags:
+        - docker
+    before_script:
+        - apk add clang
+    script:
+        - build/alltest
