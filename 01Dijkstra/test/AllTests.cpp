@@ -60,15 +60,30 @@ class TestDecreaseKey : public :: TestSkewHeap {};
 
 TEST_F(TestDecreaseKey, Increasing) {
     SkewHeap<int,int>::Node * pointers[11];
-
+ 
+    ASSERT_THROW(_vacio.decreaseKey(nullptr, 11), EmptyHeapException);
     for (int i = 0; i <= 10; ++i) {
         pointers[i] = _vacio.insert(i, i);
     }
 
+    ASSERT_THROW(_vacio.decreaseKey(nullptr, 10), invalid_argument);
     ASSERT_THROW(_vacio.decreaseKey(pointers[5], 15), KeyGreaterException);
+    ASSERT_NO_THROW(_vacio.decreaseKey(pointers[5], 5));
     ASSERT_NO_THROW(_vacio.decreaseKey(pointers[5], -10));
+    ASSERT_EQ(pointers[5]->getKey(), -10);
     ASSERT_EQ(_vacio.getMin()->getKey(), -10);
+    ASSERT_EQ(pointers[5], _vacio.getMin());
     ASSERT_EQ(_vacio.getMin()->getVal(), 5);
+}
+
+TEST_F(TestDecreaseKey, Root) {
+    for (int i = 0; i <= 10; ++i) {
+        _vacio.insert(i, i);
+    }
+
+    auto root = _vacio.getMin();
+    ASSERT_NO_THROW(_vacio.decreaseKey(root, -100));
+    ASSERT_EQ(_vacio.getMin(), root);
 }
 
 int main(int argc, char * argv[]) {

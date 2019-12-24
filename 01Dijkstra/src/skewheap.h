@@ -1,5 +1,6 @@
 #pragma once
-#include <iterator>
+
+#include <assert.h>
 
 class EmptyHeapException {};
 class KeyGreaterException {};
@@ -50,9 +51,11 @@ class SkewHeap {
         }
 
         Node * insert(K key, V val) {
-        	_root = join(_root, new Node(key, val));
+            Node * n = new Node(key, val);
+
+        	_root = join(_root, n);
             _root->_up = nullptr;
-            return _root;
+            return n;
         }
 
         bool empty() const {
@@ -66,9 +69,23 @@ class SkewHeap {
         }
         
         void decreaseKey(Node * node, K newKey) {
+            if (_root == nullptr) throw EmptyHeapException();
+            if (node == nullptr) throw std::invalid_argument("Can't decrease nullptr");
             if (newKey > node->_key) throw KeyGreaterException();
 
+            auto up = node->_up;
+            node->_key = newKey;
 
+            if (node->_up != nullptr) {
+                if (node == up->_left)
+                    up->_left = nullptr;
+                else
+                    up->_right = nullptr;
+
+                node->_up = nullptr;
+                _root = join(_root, node);
+                _root->_up = nullptr;
+            }
         }
     private:
         Node * _root;
@@ -92,6 +109,9 @@ class SkewHeap {
             std::swap(n1->_left, n1->_right);
             n1->_left = join(n2, n1->_left);
             n1->_left->_up = n1;
+
+            assert(n1->_left->_up == n1);
+            assert(n1->_right == nullptr || n1->_right->_up == n1);
 
 			return n1;
 		}
