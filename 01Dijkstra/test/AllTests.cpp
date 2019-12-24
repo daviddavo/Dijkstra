@@ -56,6 +56,21 @@ TEST_F(TestDelete, Decreasing) {
 	}
 }
 
+class TestDecreaseKey : public :: TestSkewHeap {};
+
+TEST_F(TestDecreaseKey, Increasing) {
+    SkewHeap<int,int>::Node * pointers[11];
+
+    for (int i = 0; i <= 10; ++i) {
+        pointers[i] = _vacio.insert(i, i);
+    }
+
+    ASSERT_THROW(_vacio.decreaseKey(pointers[5], 15), KeyGreaterException);
+    ASSERT_NO_THROW(_vacio.decreaseKey(pointers[5], -10));
+    ASSERT_EQ(_vacio.getMin()->getKey(), -10);
+    ASSERT_EQ(_vacio.getMin()->getVal(), 5);
+}
+
 int main(int argc, char * argv[]) {
 	::testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();

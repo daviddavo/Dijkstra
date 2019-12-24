@@ -17,4 +17,13 @@ vector<pair<W, LabeledVertex<L>>> dijkstra(LabeledWeightedGraph<L,W> g, Vertex &
 
 		path[v._label] = nullptr;
 	}
+
+    auto * act;
+    while (!pq.empty()) {
+        act = pq.getMin();
+
+        pq.delete(); 
+
+        pq.deleteMin();
+    }
 }

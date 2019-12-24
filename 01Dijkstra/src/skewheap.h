@@ -2,6 +2,7 @@
 #include <iterator>
 
 class EmptyHeapException {};
+class KeyGreaterException {};
 
 template <class K, class V>
 class SkewHeap {
@@ -9,6 +10,7 @@ class SkewHeap {
         class Node {
             K _key;
             V _val;
+            Node * _up;
             Node * _left;
             Node * _right;
 
@@ -16,7 +18,7 @@ class SkewHeap {
 
             public:
             	Node(K key, V val) :
-            		_key(key), _val(val), _left(nullptr), _right(nullptr) {}
+            		_key(key), _val(val), _up(nullptr), _left(nullptr), _right(nullptr) {}
 
                 K getKey() const { return _key; }
                 V getVal() const { return _val; }
@@ -47,14 +49,26 @@ class SkewHeap {
         	delete aux;
         }
 
-        void insert(K key, V val) {
+        Node * insert(K key, V val) {
         	_root = join(_root, new Node(key, val));
+            _root->_up = nullptr;
+            return _root;
+        }
+
+        bool empty() const {
+            return _root == nullptr;
         }
 
         const std::vector<Node *> inorder() const {
         	auto vector = std::vector<Node*>();
         	inorder(vector, _root);
         	return vector;
+        }
+        
+        void decreaseKey(Node * node, K newKey) {
+            if (newKey > node->_key) throw KeyGreaterException();
+
+
         }
     private:
         Node * _root;
@@ -63,6 +77,7 @@ class SkewHeap {
             if (node->_left != nullptr) deleteHeap(node->_left);
             if (node->_right != nullptr) deleteHeap(node->_right);
             node->_left = node->_right = nullptr;
+            node->_up = nullptr;
             
             delete node;
         }
@@ -71,13 +86,12 @@ class SkewHeap {
 			if (n1 == nullptr) return n2;
 			if (n2 == nullptr) return n1;
 
-			// We avoid writing two if's
 			if (n1->_key > n2->_key)
-				std::swap(n1, n2);
+				return join(n2, n1);
 
-			std::swap(n1->_left, n1->_right);
-
-			n1->_left = join(n2, n1->_left);
+            std::swap(n1->_left, n1->_right);
+            n1->_left = join(n2, n1->_left);
+            n1->_left->_up = n1;
 
 			return n1;
 		}
