@@ -1,4 +1,4 @@
-stages:
+tages:
     - build
     - test
 
@@ -12,7 +12,7 @@ build dijkstra:
             - build
     artifacts:
         paths:
-            - 01Dijkstra/build/alltest
+            - 01Dijkstra/build/test*
     before_script:
         - apk add git python python3 gcc g++ clang make cmake
     script:
@@ -21,7 +21,7 @@ build dijkstra:
         - cmake ..
         - make
 
-test:
+test skew heap:
     stage: test
     image: alpine
     tags:
@@ -29,4 +29,14 @@ test:
     before_script:
         - apk add clang
     script:
-        - 01Dijkstra/build/alltest
+        - 01Dijkstra/build/testSkewHeap
+
+test dijkstra:
+    stage: test
+    image: alpine
+    tags:
+        - docker
+    before_script:
+        - apk add clang
+    script:
+        - 01Dijkstra/build/testDijkstra
