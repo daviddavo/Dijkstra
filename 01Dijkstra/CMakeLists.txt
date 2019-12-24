@@ -9,15 +9,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 include(External_GTest.cmake)
 
-add_executable(alltest test/AllTests.cpp)
-target_include_directories(alltest PUBLIC src/)
+add_executable(testSkewHeap test/testSkewHeap.cpp)
+target_include_directories(testSkewHeap PUBLIC src/)
 
-target_link_libraries(alltest ${GTEST_LIBRARY})
+target_link_libraries(testSkewHeap ${GTEST_LIBRARY})
 
 enable_testing()
 include(GoogleTest)
 gtest_add_tests(
-    TARGET alltest
+    TARGET testSkewHeap
     TEST_LIST test_targets
 )
 
