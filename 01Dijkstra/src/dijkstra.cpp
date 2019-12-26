@@ -1,8 +1,28 @@
-#include <unordered_map>
+#include "boost/property_map/property_map.hpp"
 #include "dijkstra.h"
 #include "skewheap.h"
-using namespace std;
 
+using namespace std;
+using namespace boost;
+using namespace dijkstra;
+
+void dijkstra::hw() {
+    printf("hw\n");
+}
+
+
+// Exterior properties from 
+// https://www.boost.org/doc/libs/1_72_0/libs/graph/doc/using_property_maps.html
+// std::unordered_map<vertex_descriptor, pair<int, vertex_descriptor>> dijkstra_shortest(
+namespace dijkstra {
+    void dijkstra_shortest(
+            const dijkstra::Graph & g, dijkstra::vertex_descriptor start) {
+        fprintf(stdout, "Hi\n");
+        // return std::unordered_map<vertex_descriptor, pair<int, vertex_descriptor>>();
+    }
+}
+
+/*
 template <class L, class W>
 vector<pair<LabeledVertex<L> *, W>> dijkstra(LabeledWeightedGraph<L,W> g, Vertex * start) {
 	unordered_map<LabeledVertex<L> *, W> distances;
@@ -39,3 +59,4 @@ vector<pair<LabeledVertex<L> *, W>> dijkstra(LabeledWeightedGraph<L,W> g, Vertex
 
     // Ahora convertirlo todo a un vector de pares
 }
+*/

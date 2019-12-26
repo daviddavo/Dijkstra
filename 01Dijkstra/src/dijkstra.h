@@ -1,39 +1,24 @@
 #pragma once
 
-#include <vector>
+#include "boost/graph/adjacency_list.hpp"
 
-class Vertex;
+// https://www.boost.org/doc/libs/1_72_0/libs/graph/doc/using_adjacency_list.html
+namespace dijkstra {
+    typedef boost::adjacency_list<
+        boost::vecS, // OutEdgeList (vecS -> std::vector
+        boost::vecS, // VertexList
+        boost::directedS, // Directed graph, but not bidirectional
+        boost::no_property, // Vertex properties
+        boost::property<boost::edge_weight_t, int>, // Edge properties, distance to node
+        boost::no_property // Graph Properties
+    > Graph;
 
-class Edge {
-	Vertex * _from;
-	Vertex * _to;
-};
+    void hw();
 
-template <class W>
-class WeightedEdge : Edge {
-private:
-	W _weight;
-};
+    typedef boost::graph_traits<Graph>::vertex_descriptor vertex_descriptor;
 
-class Vertex {
-	std::vector<Edge> _edges;
-};
-
-template <class L>
-class LabeledVertex : Vertex {
-	L _label;
-};
-
-/**
- * Graph represented using a adjacency list
- * Each Vertex can have a label, each edge can have
- * a weight
- */
-template <class L, class W>
-class LabeledWeightedGraph {
-private:
-	std::vector<LabeledVertex<L>> _adjList;
-};
-
-template <class L, class W>
-std::vector<std::pair<W, LabeledVertex<L>>> dijkstra(LabeledWeightedGraph<L, W> g, Vertex & source);
+    void dijkstra_shortest(
+            dijkstra::Graph & g, // The graph to explore
+            dijkstra::vertex_descriptor start // Starting point
+        );
+}
