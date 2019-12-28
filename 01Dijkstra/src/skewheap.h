@@ -46,8 +46,11 @@ class SkewHeap {
         void deleteMin() {
             if (_root == nullptr) throw EmptyHeapException();
         	auto aux = _root;
-        	_root = join(aux->_left, aux->_right);
+            _root = aux->esHoja()?nullptr:join(aux->_left, aux->_right);
+            if (_root != nullptr) _root->_up = nullptr;
         	delete aux;
+
+        	assert(_root == nullptr || _root->_up == nullptr);
         }
 
         Node * insert(K key, V val) {
