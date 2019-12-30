@@ -4,7 +4,7 @@ project(DijkstraSkew VERSION 1.0)
 
 # target_include_directories(DijkstraSkew PUBLIC src/)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 include(External_GTest.cmake)
@@ -35,6 +35,10 @@ target_link_libraries(testDijkstra ${GTEST_LIBRARY} dijkstra)
 target_include_directories(testDijkstra PUBLIC ${CMAKE_CURRENT_LIST_DIR}/src)
 target_link_libraries(testReader ${GTEST_LIBRARY} graphReader graph)
 target_include_directories(testReader PUBLIC ${CMAKE_CURRENT_LIST_DIR}/src)
+
+add_executable(time time/time.cpp)
+target_include_directories(time PUBLIC ${CMAKE_CURRENT_LIST_DIR}/src)
+target_link_libraries(time graphReader graph dijkstra)
 
 enable_testing()
 include(GoogleTest)

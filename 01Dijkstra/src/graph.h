@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <stdexcept>
 #include <cassert>
 
 /** Type declarations */
@@ -46,6 +47,16 @@ vertex_descriptor add_vertex(Graph<W> & g, std::string label = "") {
     if (g.size() == 0) g.push_back(Vertex<W>(0, "null"));
     g.push_back(Vertex<W>(g.size(), label));
     return g.size() - 1;
+}
+
+template <class W>
+void add_vertices(Graph<W> & g, unsigned nvertices) {
+    if (g.size() == 0) g.push_back(Vertex<W>(0, "null"));
+    g.reserve(g.size() + nvertices);
+    vertex_descriptor offset = g.size();
+    for (vertex_descriptor i = 0; i < nvertices; ++i) {
+        g.push_back(Vertex<W>(offset + i, "null"));
+    }
 }
 
 template <class W>

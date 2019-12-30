@@ -12,6 +12,11 @@ class TestReader : public :: testing::Test {
             "1 2 50\n";
         Graph<unsigned> _g1;
 
+        const char * _testcsv = 
+            ";2;1\n"
+            "2;0;0\n"
+            "1;50;0\n";
+
         void SetUp() override {
             add_vertex(_g1);
             add_vertex(_g1);
@@ -23,6 +28,13 @@ TEST_F(TestReader, Simple1) {
     stringstream ss (_test1);
     Graph<unsigned> g1;
     readGraph(ss, g1);
+    ASSERT_EQ(g1, _g1);
+}
+
+TEST_F(TestReader, CSV1) {
+    stringstream ss (_testcsv);
+    Graph<unsigned> g1;
+    readCSVGraph(ss, g1);
     ASSERT_EQ(g1, _g1);
 }
 

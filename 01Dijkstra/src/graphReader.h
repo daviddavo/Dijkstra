@@ -11,3 +11,6 @@
 
 void readGraph(const std::string & filename, Graph<unsigned> & g);
 void readGraph(std::istream & f, Graph<unsigned> & g);
+
+void readCSVGraph(const std::string & filename, Graph<unsigned> & g, const char delimiter=';');
+void readCSVGraph(std::istream & f, Graph<unsigned> & g, const char delimiter=';');
