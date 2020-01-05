@@ -32,9 +32,11 @@ std::vector<std::pair<W, vertex_descriptor>> dijkstra(const Graph<W> & g, vertex
     while(!pq.empty()) {
         assert(pq.getMin()->getKey() == distances[pq.getMin()->getVal()]);
         currentV = pq.getMin()->getVal();
-        pq.deleteMin(); // <-- Here
+        nodes[pq.getMin()->getVal()] = nullptr;
+        pq.deleteMin(); // <-- Here. Undefined frontier?
 
         for (Edge<W> e : g[currentV].edges) {
+        	if (nodes[e.to] == nullptr) continue;
             assert(e.from == currentV);
             W tmpdst;
 
@@ -44,6 +46,7 @@ std::vector<std::pair<W, vertex_descriptor>> dijkstra(const Graph<W> & g, vertex
                 path[e.to] = currentV;
                 /* We need to save the pointer to that node */
                 // pq.decreaseKey(currentN, tmpdst);
+                assert(nodes[e.to] != nullptr);
                 pq.decreaseKey(nodes[e.to], tmpdst);
             }
         }

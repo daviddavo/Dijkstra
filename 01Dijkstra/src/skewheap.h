@@ -27,6 +27,15 @@ class SkewHeap {
                 bool esHoja() const {
                 	return _left == nullptr && _right == nullptr;
                 }
+
+            private:
+                static bool robust(const Node * n) {
+                	if (n == nullptr) return true;
+                	if (n->_left != nullptr && n->_left->_up != n) return false;
+                	if (n->_right != nullptr && n->_right->_up != n) return false;
+                	if (n->_up != nullptr && n->_up->_right != n && n->_up->_left != n) return false;
+                	return robust(n->_left) && robust(n->_right);
+                }
         };
 
         SkewHeap() : _root(nullptr) {}
@@ -40,17 +49,32 @@ class SkewHeap {
 
         Node * getMin() const {
             if (_root == nullptr) throw EmptyHeapException();
+            assert(Node::robust(_root));
+            assert(_root->_up == nullptr);
+            assert(_root->_left == nullptr || _root->_left->_up == _root);
+            assert(_root->_right == nullptr || _root->_right->_up == _root);
         	return _root;
         }
 
         void deleteMin() {
             if (_root == nullptr) throw EmptyHeapException();
         	auto aux = _root;
-            _root = aux->esHoja()?nullptr:join(aux->_left, aux->_right);
-            if (_root != nullptr) _root->_up = nullptr;
+
+        	if (_root->esHoja()) {
+        		_root = nullptr;
+        	} else {
+        		if (aux->_left != nullptr) aux->_left->_up = nullptr;
+        		if (aux->_right != nullptr) aux->_right->_up = nullptr;
+        		_root = join(aux->_left, aux->_right);
+        		_root->_up = nullptr;
+        	}
+
+        	aux->_left = aux->_right = nullptr;
         	delete aux;
 
         	assert(_root == nullptr || _root->_up == nullptr);
+        	assert(_root == nullptr || _root->_left == nullptr || _root->_left->_up == _root);
+			assert(_root == nullptr || _root->_right == nullptr || _root->_right->_up == _root);
         }
 
         Node * insert(K key, V val) {
@@ -58,6 +82,9 @@ class SkewHeap {
 
         	_root = join(_root, n);
             _root->_up = nullptr;
+
+			assert(_root->_left == nullptr || _root->_left->_up == _root);
+			assert(_root->_right == nullptr || _root->_right->_up == _root);
             return n;
         }
 
@@ -76,18 +103,26 @@ class SkewHeap {
             if (node == nullptr) throw std::invalid_argument("Can't decrease nullptr");
             if (newKey > node->_key) throw KeyGreaterException();
 
-            auto up = node->_up;
+            auto & up = node->_up;
             node->_key = newKey;
 
-            if (node->_up != nullptr) {
-                if (node == up->_left)
-                    up->_left = nullptr;
-                else
-                    up->_right = nullptr;
+            // If node->_up is nullpointer, then it's the root
+            // we don't have to do anything
+            assert(Node::robust(node));
+            assert(up != nullptr || node == _root);
+            if (up != nullptr) {
+                if (node != up->_right)
+                    std::swap(up->_left, up->_right);
 
+                assert(up->_right == node || up->_left == node);
+                up->_right = nullptr;
                 node->_up = nullptr;
+
                 _root = join(_root, node);
                 _root->_up = nullptr;
+
+				assert(_root->_left == nullptr || _root->_left->_up == _root);
+				assert(_root->_right == nullptr || _root->_right->_up == _root);
             }
         }
     private:
@@ -109,14 +144,23 @@ class SkewHeap {
 			if (n1->_key > n2->_key)
 				return join(n2, n1);
 
+			assert(n1->_up == nullptr || n1->_up->_left == n1 || n1->_up->_right == n1);
+			assert(n1->_left == nullptr || n1->_left->_up == n1);
+			assert(n1->_right == nullptr || n1->_right->_up == n1);
+			assert(n2->_up == nullptr || n2->_up->_left == n2 || n2->_up->_right == n2);
+			assert(n2->_left == nullptr || n2->_left->_up == n2);
+			assert(n2->_right == nullptr || n2->_right->_up == n2);
+
             std::swap(n1->_left, n1->_right);
-            n1->_left = join(n2, n1->_left);
+            n1->_left = join(n1->_left, n2);
             n1->_left->_up = n1;
 
             assert(n1->_left->_up == n1);
-            if (n1->_right != nullptr)
-                printf("0x%08x, 0x%08x\n", n1->_right, n1->_right->_up);
             assert(n1->_right == nullptr || n1->_right->_up == n1);
+            assert(n1->_up == nullptr || n1->_up->_left == n1 || n1->_up->_right == n1);
+            assert(n2->_up == nullptr || n2->_up->_left == n2 || n2->_up->_right == n2);
+			assert(n2->_left == nullptr || n2->_left->_up == n2);
+			assert(n2->_right == nullptr || n2->_right->_up == n2);
 
 			return n1;
 		}
