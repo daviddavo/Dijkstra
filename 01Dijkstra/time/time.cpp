@@ -20,17 +20,6 @@ bool inline fileExists(const string & str) {
     return fileExists(str.c_str());
 }
 
-/**
- * For small numbers, is faster to check with stat if a file exists
- * than getting the DIR entry and iterating over it
- */ 
-string getNextFileName(string path, string fname) {
-    int i = 1;
-    while(fileExists(fname + to_string(i))) ++i;
-
-    return fname + to_string(i);
-}
-
 long int timeDijkstra(Graph<unsigned> & g, vertex_descriptor source) {
     time_point<high_resolution_clock> start, end;
 
@@ -42,13 +31,35 @@ long int timeDijkstra(Graph<unsigned> & g, vertex_descriptor source) {
     return diff;
 }
 
+bool readFile(Graph<unsigned> & g, const string & filename) {
+    size_t i = filename.rfind('.', filename.length());
+    unsigned nedges = 0;
+
+    if (i == -1) return false;
+    string ext = filename.substr(i+1, filename.length() - i);
+    if (ext == "csv" || ext == "edges") {
+        printf("Reading CSV file %s\n", filename.c_str());
+        readCSVGraph(filename, g, nedges);
+    } else if (ext == "net") {
+        printf("Reading Pajek NET file %s\n", filename.c_str(), nedges);
+        readNETGraph(filename, g, nedges);
+    } else {
+        printf("Unknown extension: %s\n", ext.c_str());
+        return false;
+    }
+
+    printf("Read %d vertices and %d edges\n", g.size()-1, nedges);
+
+    return true;
+}
+
 int main(int argc, char * argv[]) {
-    printf("%s\n", argv[0]);
-    printf("%s\n", getNextFileName("", argv[1]).c_str());
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s [filename]\n", argv[0]);
+        return 1;
+    }
     Graph<unsigned> g1;
-    add_vertex(g1);
-    add_vertex(g1);
-    add_edge(g1, 1, 2);
+    readFile(g1, argv[1]);
     // printf("%s %d\n", timeDijkstra(g1, 1));
     cout << "nanoseconds: " << timeDijkstra(g1, 1) << "\n";
     return 0;

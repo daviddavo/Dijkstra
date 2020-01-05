@@ -114,6 +114,8 @@ class SkewHeap {
             n1->_left->_up = n1;
 
             assert(n1->_left->_up == n1);
+            if (n1->_right != nullptr)
+                printf("0x%08x, 0x%08x\n", n1->_right, n1->_right->_up);
             assert(n1->_right == nullptr || n1->_right->_up == n1);
 
 			return n1;

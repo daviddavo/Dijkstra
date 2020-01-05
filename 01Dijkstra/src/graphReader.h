@@ -9,8 +9,12 @@
 /** This implements a simple pajek reader
  * supporting only *Vertices (without labels) and *arcs with weights */
 
-void readGraph(const std::string & filename, Graph<unsigned> & g);
-void readGraph(std::istream & f, Graph<unsigned> & g);
+void readNETGraph(const std::string & filename, Graph<unsigned> & g);
+void readNETGraph(std::istream & f, Graph<unsigned> & g);
+void readNETGraph(const std::string & filename, Graph<unsigned> & g, unsigned & cntedges);
+void readNETGraph(std::istream & f, Graph<unsigned> & g, unsigned & cntedges);
 
+void readCSVGraph(const std::string & filename, Graph<unsigned> & g, unsigned & cnt, const char delimiter=';');
+void readCSVGraph(std::istream & f, Graph<unsigned> & g, unsigned & cnt, const char delimiter=';');
 void readCSVGraph(const std::string & filename, Graph<unsigned> & g, const char delimiter=';');
 void readCSVGraph(std::istream & f, Graph<unsigned> & g, const char delimiter=';');
