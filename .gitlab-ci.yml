@@ -14,12 +14,13 @@ build dijkstra:
         paths:
             - 01Dijkstra/build/test*
     before_script:
-        - apk add git python python3 gcc g++ clang make cmake
+        - apk add git python python3 gcc g++ clang make cmake boost-dev
     script:
         - mkdir -p 01Dijkstra/build
         - cd 01Dijkstra/build
         - cmake ..
         - make
+        - make test
 
 test skew heap:
     stage: test
