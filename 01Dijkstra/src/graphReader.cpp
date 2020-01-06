@@ -56,13 +56,12 @@ void readNETGraph(istream & f, Graph<unsigned> & g, unsigned & cntedges) {
     line.clear();
     while(isBlank(line)) {
         getline(f, line, '\n');
-        printf("line: %s\n", line.c_str());
     }
 
     stringstream(line) >> edges;
     if (!iequals(edges, DELIMITER_EDGES)) {
         stringstream(line) >> from >> to >> weight;
-        printf(">>  %5d: f: %d, t: %d, w: %d\n", cntedges, from, to, weight);
+        // printf(">>  %5d: f: %d, t: %d, w: %d\n", cntedges, from, to, weight);
         add_edge(g, from, to, weight);
         ++cntedges;
     }
@@ -72,7 +71,7 @@ void readNETGraph(istream & f, Graph<unsigned> & g, unsigned & cntedges) {
         // printf("%s (%d)\n", line.c_str(), f.eof());
         if (!f.eof() && f.peek() == '\n') f.ignore();
         stringstream(line) >> from >> to >> weight;
-        printf(">>> %5d: f: %d, t: %d, w: %d\n", cntedges, from, to, weight);
+        // printf(">>> %5d: f: %d, t: %d, w: %d\n", cntedges, from, to, weight);
         add_edge(g, from, to, weight);
         ++cntedges;
     };
