@@ -1,6 +1,5 @@
 stages:
     - build
-    - doc
 
 build dijkstra:
     stage: build
@@ -9,10 +8,11 @@ build dijkstra:
         - docker
     cache:
         paths:
-            - build
+            - Release
     artifacts:
         paths:
-            - 01Dijkstra/build/test*
+            - 01Dijkstra/Release/test*
+            - 01Dijkstra/Release/time
     before_script:
         - apk add git python python3 gcc g++ clang make cmake boost-dev
     script:
@@ -21,3 +21,19 @@ build dijkstra:
         - cmake -DCMAKE_BUILD_TYPE=Release ..
         - make
         - make test
+
+build pdf:
+    stage: build
+    image: alpine
+    tags:
+        - docker
+    artifacts:
+        paths:
+            - 01Dijkstra/tex/main.pdf
+    before_script:
+        - apk add make texlive-full python3 py-pip
+        - pip install pygments
+    script:
+        - cd 01Dijkstra/tex
+        - make
+    
