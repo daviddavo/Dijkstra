@@ -3,13 +3,13 @@
 \usepackage[T1]{fontenc}
 \usepackage[a4paper, margin=1in]{geometry}
 \usepackage[spanish]{babel}
+\usepackage{gnuplottex}
 \usepackage{fancyhdr}
 \usepackage{minted}
 \usepackage{multicol}
 \usepackage{algpseudocode}
 \usepackage{hyperref}
 \usepackage{tikz}
-
 \usetikzlibrary{arrows.meta}
 \tikzset{>=stealth}
 \tikzset{vertex/.style = {shape=circle,draw,minimum size=2em}}
@@ -196,14 +196,51 @@ Como casos de prueba automatizados para el algoritmo de Dijsktra se han usado lo
 \end{tikzpicture}
 \end{minipage}
 
-El primero es trivial, y el segundo debería devolver el camino 1, 3, 2 con peso 150 para el nodo 2. También se han realizado pruebas con grafos más grandes ``a mano", como con el laberinto de Sedgewick \cite{SedgewickLabyrinth} y pequeños grafos generados aleatoriamente.
+El primero es trivial, y el segundo debería devolver el camino 1, 3, 2 con peso 150 para el nodo 2; y el camino 1,3 para el nodo 3; el nodo 1 debería tener como predecesor el vértice nulo y coste 0. También se han realizado pruebas con grafos más grandes ``a mano", como con el laberinto de Sedgewick \cite{SedgewickLabyrinth} y pequeños grafos generados aleatoriamente.
 
-El código de dichos tests unitarios puede encontrarse en \url{https://gitlab.com/daviddavo/19MARP/blob/master/01Dijkstra/test/}
+El código de dichos tests unitarios puede encontrarse en la carpeta \texttt{test/}
 
 \section{Generación de grafos aleatorios}
-Para poder tratar más fácilmente con distintos grafos se han creado funciones auxiliares que permitan leer archivos en formato \texttt{csv} y el formato \texttt{net}  usado por Pajek \cite{Pajek}, que solo especifica el numero de vertices y las aristas que los conectan (ocupando mucho menos espacio para grafos muy dispersos). Dichas funciones se han implementado en el fichero \texttt{graphReader.cpp}.
+Para poder tratar más fácilmente con distintos grafos se han creado funciones auxiliares que permitan leer archivos en formato \texttt{csv} y en el formato
+\texttt{net}  usado por Pajek \cite{Pajek}, en el que solo es necesario especificar el numero de vértices y las aristas que los conectan (ocupando mucho menos espacio para grafos muy dispersos). Dichas funciones se han implementado en el fichero \texttt{graphReader.cpp}.
 
-Para el tratamiento estadístico de datos se han generado grafos aleatorios con el modelo Erdős-Rényi, usando la función \texttt{gnp\_random\_graph} de la librería networkx de Python. Los grafos generados se pasarían mediante un pipe al programa \texttt{time.cpp}, que leería el grafo de la entrada estándar y retornaría el tiempo de ejecutar el algoritmo de Dijkstra, que será guardado en un archivo \texttt{csv} junto con el número de vértices y aristas del grafo generado para poder representar las gráficas de tiempo usando \texttt{gnuplot}. Se han generado diversos archivos con distinta densidad de vértices ($0,01$, $0,05$, $0,1$, $0,2$ y $0,5$). En lugar de guardar los archivos con los grafos generados (de hasta varios GB), se han generado los grafos de prueba con la misma semilla: 42, por lo que los grafos se pueden volver a generar fácilmente usando la misma semilla y la misma función. Este método se ha ejecutado 3 veces y se ha calculado la media para cada uno de los 3 archivos generados con \textit{awk}.
+Para el tratamiento estadístico de datos se han generado grafos aleatorios con el modelo Erdős-Rényi, usando la función \texttt{gnp\_random\_graph} de la librería networkx\footnote{\url{https://networkx.github.io/}} de Python. Los grafos generados se pasarían mediante un pipe al programa \texttt{src/time.cpp}, que leería el grafo de la entrada estándar y retornaría el tiempo de ejecutar el algoritmo de Dijkstra, que será guardado en un archivo \texttt{csv} junto con el número de vértices y aristas del grafo generado para poder representar las gráficas de tiempo usando \texttt{gnuplot}. Se han generado diversos archivos con distinta densidad de vértices ($0.01$, $0.05$, $0.1$, $0.2$ y $0.5$). En lugar de guardar los archivos con los grafos generados (de hasta varios GB para una proporción de $0.5$), se han generado los grafos de prueba con la misma semilla: 42, por lo que los grafos se pueden volver a generar fácilmente usando la misma semilla y la misma función. Este método se ha ejecutado 3 veces y se ha calculado la media para cada uno de los 3 archivos generados con \textit{awk}.
+
+Para la regresión de las funciones, tenemos que tener en cuenta que el coste es de $\mathcal{O}(|E| + |V|\log|V|)$, siendo $|E|$ el número de aristas y $|V|$ el número de vértices.  El número de aristas es dependiente del número de vértices, teniendo en cuenta que $|E| = \alpha\cdot|V|$, por lo que el orden al que pertenece la función (dependiente sólo del numero de vértices) se nos queda en
+$\alpha|V| + |V|\log|V| = |V|\left(\alpha+\log|V|\right)$
+
+\section{Resultados estadísticos}
+\begin{figure}
+	\centering
+	\begin{gnuplot}[terminal=epslatex, terminaloptions=color]
+		xmax = 6000
+		ymax = 20
+		stons = 10**6
+		set datafile separator comma
+		
+		set style line 1 pt 5 lc rgb "#e51e10"
+		set style line 2 pt 5 lc rgb "#a009e73"
+		set style line 3 pt 5 lc rgb "#e69f00"
+		set style line 7 pt 5 lc rgb "#56b4e9"
+		
+		f1(x) = 0.1*a*x+b*x*log(x)
+		fit f1(x) "../out/gnp2_42_01.csv" u 1:($3/stons) via a, b
+		
+		set xlabel "$|V|$"
+		set ylabel "$t (ms)$"
+
+		plot [0:xmax] [0:ymax] \
+			"../out/gnp2_42_01.csv" u 1:($3/stons) w dots ls 1 notitle, \
+			1/0 ls 1 lw 10 w p t "$\\alpha=0.01$", \
+			f1(x) title "f1(x)" w lines
+			# "../out/gnp2_42_05.csv" u 1:($3/stons) w dots ls 2 notitle, \
+			# 1/0 ls 2 lw 10 w p t "$\\alpha=0.05$", \
+			# "../out/gnp2_42_1.csv" u 1:($3/stons) w dots ls 3 notitle, \
+			# 1/0 ls 3 lw 10 w p t "$\\alpha=0.10$", \
+			# "../out/gnp2_42_2.csv" u 1:($3/stons) w dots ls 7 notitle, \
+			# 1/0 ls 7 lw 10 w p t "$\\alpha=0.20$, \
+	\end{gnuplot}
+\end{figure}
 
 \nocite{*} % <-- Recuerda quitar esto
 \bibliographystyle{alpha}

@@ -1,9 +1,12 @@
 build
 .cproject
 .project
+tmpfile.net
 
 # NOW LATEX THINGS
 main.pdf
+main-gnuplot*
+main.gnuploterrors
 
 ## Core latex/pdflatex auxiliary files:
 *.aux

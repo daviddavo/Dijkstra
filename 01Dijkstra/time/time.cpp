@@ -31,9 +31,20 @@ long int timeDijkstra(const Graph<unsigned> & g, vertex_descriptor source) {
     start = high_resolution_clock::now();
     dijkstra(g, source);
     end = high_resolution_clock::now();
-    long int diff = duration_cast<nanoseconds>(end-start).count(); 
+    long int diff = duration_cast<nanoseconds>(end-start).count();
     if (diff < 10000) fprintf(stderr, "Warning: Test took less than 10 ms\n");
     return diff;
+}
+
+long int timeDijsktraWrapper(const Graph<unsigned> & g, vertex_descriptor source) {
+	long int S = timeDijkstra(g, source);
+	if (S < 10000000) {
+		// 99 + 1 = 100
+		for (int i = 1; i < 100; ++i) S += timeDijkstra(g, source);
+		S = S / 100;
+	}
+
+	return S;
 }
 
 bool readFile(Graph<unsigned> & g, const string & filename) {
@@ -43,17 +54,17 @@ bool readFile(Graph<unsigned> & g, const string & filename) {
     if (i == -1) return false;
     string ext = filename.substr(i+1, filename.length() - i);
     if (ext == "csv" || ext == "edges") {
-        printf("Reading CSV file %s\n", filename.c_str());
+        fprintf(stderr, "Reading CSV file %s\n", filename.c_str());
         readCSVGraph(filename, g, nedges);
     } else if (ext == "net") {
-        printf("Reading Pajek NET file %s\n", filename.c_str(), nedges);
+        fprintf(stderr, "Reading Pajek NET file %s\n", filename.c_str(), nedges);
         readNETGraph(filename, g, nedges);
     } else {
         printf("Unknown extension: %s\n", ext.c_str());
         return false;
     }
 
-    printf("Read %d vertices and %d edges\n", g.size()-1, nedges);
+    fprintf(stderr, "Read %d vertices and %d edges\n", g.size()-1, nedges);
 
     return true;
 }
@@ -67,7 +78,7 @@ void writeHeader(ostream & s, const string & filename, unsigned nvertex, unsigne
 
 void writeCSVBody(ostream & s, const Graph<unsigned> & g) {
 	for (vertex_descriptor i = 1; i < g.size(); ++i) {
-		s << setw(8) << i << SEPARATOR_CHAR << setw(12) << timeDijkstra(g, i) << '\n';
+		s << setw(8) << i << SEPARATOR_CHAR << setw(12) << timeDijsktraWrapper(g, i) << '\n';
 	}
 }
 
@@ -100,7 +111,7 @@ int main(int argc, char * argv[]) {
     if (argc == 4) source = stoul(argv[3]);
 
     if (source) {
-    	printf("%d\n", timeDijkstra(g, source));
+    	printf("%d\n", timeDijsktraWrapper(g, source));
     } else {
 		if (argv[2][0] == '-') {
 			writeHeader(cout, argv[1], g.size()-1, nedges);

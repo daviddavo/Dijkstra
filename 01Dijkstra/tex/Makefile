@@ -9,4 +9,4 @@ $(MAINFILE).pdf: $(MAINFILE).tex
 clean:
 	latexmk -CA
 	rm -rf _minted-$(MAINFILE)
-	rm -f $(MAINFILE).bbl $(MAINFILE).pyg 
+	rm -f $(MAINFILE).bbl $(MAINFILE).pyg $(MAINFILE)-gnuplot* 
