@@ -3,6 +3,14 @@
 #include <fstream>
 #include <sstream>
 
+/**
+ * NOTA IMPORTANTE:
+ * Es mejor no mirar este fichero
+ * Funciona cogido entre los pelos pues no hubo tiempo
+ * para implementar un intérprete completo en C++ para
+ * una simple práctica.
+ */
+
 using namespace std;
 using boost::iequals;
 

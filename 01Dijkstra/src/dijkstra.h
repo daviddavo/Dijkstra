@@ -17,43 +17,43 @@ std::vector<std::pair<W, vertex_descriptor>> dijkstra(const Graph<W> & g, vertex
     using SHNode = typename SkewHeap<W, vertex_descriptor>::Node;
     std::vector<SHNode *> nodes(g.size());
 
-    // First we populate the path, distances, nodes, etc table
-    // O(V)
+    // Primero poblamos la tabla de distancias (con 0 si es la fuente y infinito en caso contrario
+    // También rellenamos la tabla de caminos (el antecesor será indeterminado al comenzar -> vértice nulo)
+    // Y la tabla de referencias a los nodos para evitar la búsqueda
+    // Como insertar en el montículo tiene un coste de O(logn) este bucle tendrá un coste de O(nlogn)
     for (vertex_descriptor i = 1; i < g.size(); ++i) {
-        if (i == vd) distances[i] = 0;
-        else distances[i] = std::numeric_limits<W>::max();
+    	distances[i] = (i==vd)?0:std::numeric_limits<W>::max();
 
         path[i] = 0;
         nodes[i] = pq.insert(distances[i], i);
     }
 
-    // Now we do the algoritm
-    vertex_descriptor currentV;
+    // Realizamos el algoritmo de Dijkstra
     while(!pq.empty()) {
-        assert(pq.getMin()->getKey() == distances[pq.getMin()->getVal()]);
-        currentV = pq.getMin()->getVal();
-        nodes[pq.getMin()->getVal()] = nullptr;
-        pq.deleteMin(); // <-- Here. Undefined frontier?
+    	vertex_descriptor currentV = pq.getMin()->getVal();
+    	// No hay implementado un método "pop", por lo que obtenemos el mínimo
+    	// y acto seguido lo borramos de la pila
+    	// Al marcarlo en la tabla de referencias como "nulo", lo estamos marcando como "visitado"
+        pq.deleteMin();
+        nodes[currentV] = nullptr;
 
+        // Recorremos todos los vecinos del vértice que no hayamos visitado ya
         for (Edge<W> e : g[currentV].edges) {
         	if (nodes[e.to] == nullptr) continue;
-            assert(e.from == currentV);
-            W tmpdst;
 
-            tmpdst = distances[currentV] + e.weight;
+        	// Si la distancia hasta ese vecino es menor que la que tenemos guardada
+        	// Actualizamos los datos (camino y distancia) y aumentamos su prioridad en la cola
+        	// (Decrementamos el valor de la clave)
+        	W tmpdst = distances[currentV] + e.weight;
             if (tmpdst < distances[e.to]) {
                 distances[e.to] = tmpdst;
                 path[e.to] = currentV;
-                /* We need to save the pointer to that node */
-                // pq.decreaseKey(currentN, tmpdst);
-                assert(nodes[e.to] != nullptr);
                 pq.decreaseKey(nodes[e.to], tmpdst);
             }
         }
     }
 
-    // And now to put it in vector format
-    // O(V)
+    // Hacemos y retornamos el equivalente a zip(distances, path)
     std::vector<std::pair<W, vertex_descriptor>> ret(g.size());
     ret[0] = std::pair<W, vertex_descriptor>(std::numeric_limits<W>::max(), 0); // We put the null node
     for(vertex_descriptor i = 1; i < g.size(); ++i) {

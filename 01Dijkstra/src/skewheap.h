@@ -7,15 +7,15 @@ class KeyGreaterException {};
 
 template <class K, class V>
 class SkewHeap {
-	/* Node _root */
+	/* Node _root */ // Declarado en la parte private
 
     public:
         class Node {
             K _key;
             V _val;
-            Node * _up;
-            Node * _left;
-            Node * _right;
+            Node * _up;	// Referencia al padre
+            Node * _left; // Hijo izquierdo
+            Node * _right; // Hijo derecho
 
             friend class SkewHeap;
 
@@ -42,9 +42,6 @@ class SkewHeap {
 
         Node * getMin() const {
             if (_root == nullptr) throw EmptyHeapException();
-            assert(_root->_up == nullptr);
-            assert(_root->_left == nullptr || _root->_left->_up == _root);
-            assert(_root->_right == nullptr || _root->_right->_up == _root);
         	return _root;
         }
 
@@ -63,10 +60,6 @@ class SkewHeap {
 
         	aux->_left = aux->_right = nullptr;
         	delete aux;
-
-        	assert(_root == nullptr || _root->_up == nullptr);
-        	assert(_root == nullptr || _root->_left == nullptr || _root->_left->_up == _root);
-			assert(_root == nullptr || _root->_right == nullptr || _root->_right->_up == _root);
         }
 
         Node * insert(K key, V val) {
@@ -75,8 +68,6 @@ class SkewHeap {
         	_root = join(_root, n);
             _root->_up = nullptr;
 
-			assert(_root->_left == nullptr || _root->_left->_up == _root);
-			assert(_root->_right == nullptr || _root->_right->_up == _root);
             return n;
         }
 
@@ -100,20 +91,15 @@ class SkewHeap {
 
             // If node->_up is nullpointer, then it's the root
             // we don't have to do anything
-            assert(up != nullptr || node == _root);
             if (up != nullptr) {
                 if (node != up->_right)
                     std::swap(up->_left, up->_right);
 
-                assert(up->_right == node || up->_left == node);
                 up->_right = nullptr;
                 node->_up = nullptr;
 
                 _root = join(_root, node);
                 _root->_up = nullptr;
-
-				assert(_root->_left == nullptr || _root->_left->_up == _root);
-				assert(_root->_right == nullptr || _root->_right->_up == _root);
             }
         }
     private:
@@ -135,23 +121,9 @@ class SkewHeap {
 			if (n1->_key > n2->_key)
 				std::swap(n2, n1);
 
-			assert(n1->_up == nullptr || n1->_up->_left == n1 || n1->_up->_right == n1);
-			assert(n1->_left == nullptr || n1->_left->_up == n1);
-			assert(n1->_right == nullptr || n1->_right->_up == n1);
-			assert(n2->_up == nullptr || n2->_up->_left == n2 || n2->_up->_right == n2);
-			assert(n2->_left == nullptr || n2->_left->_up == n2);
-			assert(n2->_right == nullptr || n2->_right->_up == n2);
-
             std::swap(n1->_left, n1->_right);
             n1->_left = join(n1->_left, n2);
             n1->_left->_up = n1;
-
-            assert(n1->_left->_up == n1);
-            assert(n1->_right == nullptr || n1->_right->_up == n1);
-            assert(n1->_up == nullptr || n1->_up->_left == n1 || n1->_up->_right == n1);
-            assert(n2->_up == nullptr || n2->_up->_left == n2 || n2->_up->_right == n2);
-			assert(n2->_left == nullptr || n2->_left->_up == n2);
-			assert(n2->_right == nullptr || n2->_right->_up == n2);
 
 			return n1;
 		}
