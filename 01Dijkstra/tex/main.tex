@@ -1,0 +1,124 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[a4paper, margin=1in]{geometry}
+\usepackage[spanish]{babel}
+\usepackage{fancyhdr}
+\usepackage{minted}
+\usepackage{multicol}
+\usepackage{algpseudocode}
+
+\title{Implementación en C++ del Algoritmo de Dijkstra sobre montículo sesgado}
+\author{David Davó Laviña}
+\date{\today{}}
+
+\pagestyle{fancy}
+\fancyhf{}
+\makeatletter
+\fancyhead[RO]{\@author}
+\fancyhead[LO]{\@title}
+\makeatother
+
+\setminted{
+	frame=lines,
+	baselinestretch=1.2,
+}
+\usemintedstyle {emacs}
+
+\begin{document}
+\section{Decrecer clave en montículos autoajustables}
+Para poder implementar de forma eficiente decrecerClave, necesitamos conocer la
+posición del nodo en el montículo, pues no podemos implementar la búsqueda en coste
+menor que $\mathcal{O}(n)$ al no estar ordenados los elementos. Se ha implementado
+decrecerClave siguiendo la idea de los \textit{pairing heaps} \cite{PairingHeap}. Si el nodo
+a eliminar no es la raíz del árbol, cortamos la arista que une el nodo con su padre y
+enlazamos los dos árboles formados por el corte. Para ello ha sido necesario
+implementar un tercer puntero en los nodos (\texttt{n->\_up}) con una referencia al padre
+que será actualizado en las funciones que modifiquen el montículo.
+
+El coste de unir dos montículos sesgados es $\mathcal{O}(\log n)$, siendo n el número de elementos en los montículos involucrados \cite{SkewHeap}. Cortar la arista que une al nodo con su padre podemos hacerlo en $\mathcal{O}(1)$, por lo que el coste de decrecerClave será el mismo que el de unir. 
+% La única duda que nos queda es: ¿Seguirá siendo un montículo sesgado tras quitarse ese nodo y sus hijos?. El nodo quitado sí es un montículo sesgado, pues 
+
+\section{Monticulos sesgados en C++}
+Para el montículo se ha definido una clase parametrizada \mintinline{C++}|SkewHeap<K,V>|, donde \texttt{K} es el tipo de la clave y \texttt{V} el del valor a asignar. Tanto en los tests como en el análisis estadístico se ha usado la clase con claves de tipo \mintinline{C++}|unsigned|. Dicha clase guarda tan solo una variable de tipo \textit{Node}, que es la raíz del montículo. La clase \textit{Nodo} guarda la clave, el valor, y 3 punteros: a su padre, su hijo izquierdo, y su hijo derecho.
+
+Las dos funciones más relevantes, \textit{join} y \textit{decreaseKey}, se han implementado tal que así:
+
+\begin{minted}[linenos]{C++}
+Node * join(Node * n1, Node * n2) {
+  if (n1 == nullptr) return n2;
+  if (n2 == nullptr) return n1;
+
+  if (n1->_key > n2->_key)
+	std::swap(n1, n2);
+
+  std::swap(n1->_left, n1->_right);
+  n1->_left = join(n1->_left, n2);
+  n1->_left->_up = n1;
+
+  return n1;
+}
+\end{minted}
+\begin{minted}[linenos]{C++}
+void decreaseKey(Node * node, K newKey) {
+  if (_root == nullptr) throw EmptyHeapException();
+  if (node == nullptr) throw std::invalid_argument("Can't decrease nullptr");
+  if (newKey > node->_key) throw KeyGreaterException();
+
+  auto & up = node->_up;
+  node->_key = newKey;
+
+  if (up != nullptr) {
+	if (node != up->_right)
+	  std::swap(up->_left, up->_right);
+
+	up->_right = nullptr;
+	node->_up = nullptr;
+
+	_root = join(_root, node);
+	_root->_up = nullptr;
+}
+\end{minted}
+
+\section{Representación de los grafos en C++}
+El grafo se ha representado como una lista de adyaciencia parametrizada
+en el tipo de los pesos de las aristas, implementada como un vector estándar del 
+tipo \texttt{Vertex<W>}. El tipo Vertex se ha implementado como un struct que
+contiene una \texttt{string} etiqueta (no usada en el algoritmo), un descriptor de
+vertice (\texttt{vertex\_descriptor}) que le identifica en el grafo (su posición en
+la lista de adyacencia), y un vector estandar de aristas (\texttt{Edge<W>}). Cada arista es un struct compuesto por el descriptor de arista (\texttt{edge\_descriptor}, el peso de tipo \texttt{W}, y los descriptores de vertice tanto del vertice al que va, como del que viene. El descriptor de vertice del vertice que viene junto al descriptor de arista nos permiten identificar una arista en el grafo. El vertice con descriptor de vertice 0 se considerará el vertice nulo, cualquier intento de usar la función para añadir una arista al vértice nulo resultará en excepción.
+\begin{minted}{C++}
+typedef unsigned edge_descriptor;
+typedef unsigned vertex_descriptor;
+
+template <class W> 
+struct Edge {
+    edge_descriptor ed;
+    vertex_descriptor to;
+    vertex_descriptor from;
+    W weight;
+};
+
+template <class W>
+struct Vertex {
+    vertex_descriptor vd;
+    std::string label;
+    std::vector<Edge<W>> edges;
+};
+
+template <class W> using Graph = std::vector<Vertex<W>>;
+\end{minted}
+
+\section{Algoritmo de Dijkstra en C++}
+Nuestra función recibe un grafo y un vértice "fuente" desde el que calcularemos los caminos mínimos. Retorna un vector de pares donde, para cada uno de los vértices, retorna la suma de los pesos por ese camino, y el antecesor a ese nodo, produciendo el árbol de caminos mínimos. Para los vértices no conectados el peso del camino será el máximo que permita el tipo, y el predecesor será el vértice nulo (vértice con descriptor 0).
+
+Por conveniencia declaramos dos vectores distintos, el vector de caminos y el vector de distancias. También declaramos la cola de prioridad implementada con el montículo sesgado y una lista de referencias a los nodos, para poder asociar cada vértice con su entrada en la lista de prioridad y poder decrecer la clave.
+
+Primero poblamos las tablas de distancias (con 0 si es el vértice fuente y $\infty$ en caso contrario) y camino. Además, insertamos los nodos en la cola de prioridad y guardamos sus referencias en la tabla.
+
+Finalmente, retornamos el \textit{zip} de ambos vectores.
+
+\nocite{*} % <-- Recuerda quitar esto
+\bibliographystyle{alpha}
+\bibliography{references}
+
+\end{document}

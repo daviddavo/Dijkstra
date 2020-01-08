@@ -65,17 +65,9 @@ void writeHeader(ostream & s, const string & filename, unsigned nvertex, unsigne
 	s << COMMENTS_CHAR << " Vertices: " << nvertex << " Edges: " << nedges << '\n';
 }
 
-void writeCSVRow(ostream & s, const Graph<unsigned> & g, vertex_descriptor row) {
-	s << setw(8) << row << SEPARATOR_CHAR << setw(12) << timeDijkstra(g, row) << '\n';
-}
-
-void writeCSVBody(ostream & s, const Graph<unsigned> & g, vertex_descriptor source) {
-	if (source) {
-		writeCSVRow(s, g, source);
-	} else {
-		for (vertex_descriptor i = 1; i < g.size(); ++i) {
-			writeCSVRow(s, g, i);
-		}
+void writeCSVBody(ostream & s, const Graph<unsigned> & g) {
+	for (vertex_descriptor i = 1; i < g.size(); ++i) {
+		s << setw(8) << i << SEPARATOR_CHAR << setw(12) << timeDijkstra(g, i) << '\n';
 	}
 }
 
@@ -85,29 +77,42 @@ int main(int argc, char * argv[]) {
         return 1;
     }
 
-    if (fileExists(argv[1])) {
+    if (fileExists(argv[2])) {
     	fprintf(stderr, "Output file already %s exists\n", argv[1]);
+    	return 2;
     }
 
     Graph<unsigned> g;
     unsigned nedges;
+    bool success;
     if (argv[1][0] == '-') {
-    	readCSVGraph(cin, g, nedges);
+    	success = readNETGraph(cin, g, nedges);
     } else {
-    	readFile(g, argv[1]);
+    	success = readFile(g, argv[1]);
+    }
+
+    if (!success) {
+    	fprintf(stderr, "Error reading file\n");
+    	return 3;
     }
 
     vertex_descriptor source = 0; // If source = 0 then we do every vertex
     if (argc == 4) source = stoul(argv[3]);
-    if (argv[2][0] == '-') {
-    	writeHeader(cout, argv[1], g.size()-1, nedges);
-    	writeCSVBody(cout, g, source);
+
+    if (source) {
+    	printf("%d\n", timeDijkstra(g, source));
     } else {
-    	ofstream f;
-    	f.open(argv[2]);
-    	writeHeader(f, argv[1], g.size()-1, nedges);
-    	writeCSVBody(f, g, source);
-    	f.close();
+		if (argv[2][0] == '-') {
+			writeHeader(cout, argv[1], g.size()-1, nedges);
+			writeCSVBody(cout, g);
+		} else {
+			ofstream f;
+			f.open(argv[2]);
+			writeHeader(f, argv[1], g.size()-1, nedges);
+			writeCSVBody(f, g);
+			f.close();
+		}
     }
+
     return 0;
 }

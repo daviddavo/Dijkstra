@@ -10,33 +10,34 @@ using boost::iequals;
 #define DELIMITER_ARCS "*arcs"
 #define DELIMITER_EDGES "*edges"
 
-void readNETGraph(istream & f, Graph <unsigned> & g) {
+bool readNETGraph(istream & f, Graph <unsigned> & g) {
     unsigned i;
-    readNETGraph(f, g, i);
+    return readNETGraph(f, g, i);
 }
 
-void readNETGraph(const std::string & filename, Graph<unsigned> & g) {
+bool readNETGraph(const std::string & filename, Graph<unsigned> & g) {
     unsigned i;
-    readNETGraph(filename, g, i);
+    return readNETGraph(filename, g, i);
 }
 
-void readNETGraph(const std::string & filename, Graph<unsigned> & g, unsigned & cntedges) {
+bool readNETGraph(const std::string & filename, Graph<unsigned> & g, unsigned & cntedges) {
     ifstream f;
     f.open(filename);
-    readNETGraph(f, g, cntedges);
+    bool s = readNETGraph(f, g, cntedges);
     f.close();
+    return s;
 }
 
 inline bool isBlank(const string & s) {
     for (int i = 0; i < s.size(); ++i) {
-        printf("char %d, %d, %d\n", i, isblank(s[i]), s[i]);
+        // fprintf(stderr, "char %d, %d, %d\n", i, isblank(s[i]), s[i]);
         if (!isblank(s[i]) && s[i] != '\r') return false;
     }
 
     return true;
 }
 
-void readNETGraph(istream & f, Graph<unsigned> & g, unsigned & cntedges) {
+bool readNETGraph(istream & f, Graph<unsigned> & g, unsigned & cntedges) {
     string vertices, arcs, edges, line = "";
     unsigned nvertices, narcs;
     unsigned from, to;
@@ -75,25 +76,29 @@ void readNETGraph(istream & f, Graph<unsigned> & g, unsigned & cntedges) {
         add_edge(g, from, to, weight);
         ++cntedges;
     };
+
+    return !f.fail();
 }
 
-void readCSVGraph(const std::string & filename, Graph<unsigned> & g, const char delimiter) {
+bool readCSVGraph(const std::string & filename, Graph<unsigned> & g, const char delimiter) {
     unsigned i;
-    readCSVGraph(filename, g, i, delimiter);
+    return readCSVGraph(filename, g, i, delimiter);
 }
-void readCSVGraph(std::istream & f, Graph<unsigned> & g, const char delimiter) {
+bool readCSVGraph(std::istream & f, Graph<unsigned> & g, const char delimiter) {
     unsigned i;
-    readCSVGraph(f, g, i, delimiter);
+    return readCSVGraph(f, g, i, delimiter);
 }
 
-void readCSVGraph(const std::string & filename, Graph<unsigned> & g, unsigned & cnt, const char delimiter) {
+bool readCSVGraph(const std::string & filename, Graph<unsigned> & g, unsigned & cnt, const char delimiter) {
     ifstream f;
     f.open(filename);
     readCSVGraph(f, g, cnt, delimiter);
+    bool ret = !f.fail();
     f.close();
+    return ret;
 }
 
-void readCSVGraph(std::istream & f, Graph<unsigned> & g, unsigned & cnt, const char delimiter) {
+bool readCSVGraph(std::istream & f, Graph<unsigned> & g, unsigned & cnt, const char delimiter) {
     string vdstr;
     vertex_descriptor vd, nvertices;
     unsigned w;
@@ -119,4 +124,6 @@ void readCSVGraph(std::istream & f, Graph<unsigned> & g, unsigned & cnt, const c
             }
         }
     }
+
+    return !f.fail();
 }

@@ -7,6 +7,8 @@ class KeyGreaterException {};
 
 template <class K, class V>
 class SkewHeap {
+	/* Node _root */
+
     public:
         class Node {
             K _key;
@@ -27,15 +29,6 @@ class SkewHeap {
                 bool esHoja() const {
                 	return _left == nullptr && _right == nullptr;
                 }
-
-            private:
-                static bool robust(const Node * n) {
-                	if (n == nullptr) return true;
-                	if (n->_left != nullptr && n->_left->_up != n) return false;
-                	if (n->_right != nullptr && n->_right->_up != n) return false;
-                	if (n->_up != nullptr && n->_up->_right != n && n->_up->_left != n) return false;
-                	return robust(n->_left) && robust(n->_right);
-                }
         };
 
         SkewHeap() : _root(nullptr) {}
@@ -49,7 +42,6 @@ class SkewHeap {
 
         Node * getMin() const {
             if (_root == nullptr) throw EmptyHeapException();
-            assert(Node::robust(_root));
             assert(_root->_up == nullptr);
             assert(_root->_left == nullptr || _root->_left->_up == _root);
             assert(_root->_right == nullptr || _root->_right->_up == _root);
@@ -108,7 +100,6 @@ class SkewHeap {
 
             // If node->_up is nullpointer, then it's the root
             // we don't have to do anything
-            assert(Node::robust(node));
             assert(up != nullptr || node == _root);
             if (up != nullptr) {
                 if (node != up->_right)
@@ -142,7 +133,7 @@ class SkewHeap {
 			if (n2 == nullptr) return n1;
 
 			if (n1->_key > n2->_key)
-				return join(n2, n1);
+				std::swap(n2, n1);
 
 			assert(n1->_up == nullptr || n1->_up->_left == n1 || n1->_up->_right == n1);
 			assert(n1->_left == nullptr || n1->_left->_up == n1);

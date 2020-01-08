@@ -9,12 +9,12 @@
 /** This implements a simple pajek reader
  * supporting only *Vertices (without labels) and *arcs with weights */
 
-void readNETGraph(const std::string & filename, Graph<unsigned> & g);
-void readNETGraph(std::istream & f, Graph<unsigned> & g);
-void readNETGraph(const std::string & filename, Graph<unsigned> & g, unsigned & cntedges);
-void readNETGraph(std::istream & f, Graph<unsigned> & g, unsigned & cntedges);
+bool readNETGraph(const std::string & filename, Graph<unsigned> & g);
+bool readNETGraph(std::istream & f, Graph<unsigned> & g);
+bool readNETGraph(const std::string & filename, Graph<unsigned> & g, unsigned & cntedges);
+bool readNETGraph(std::istream & f, Graph<unsigned> & g, unsigned & cntedges);
 
-void readCSVGraph(const std::string & filename, Graph<unsigned> & g, unsigned & cnt, const char delimiter=';');
-void readCSVGraph(std::istream & f, Graph<unsigned> & g, unsigned & cnt, const char delimiter=';');
-void readCSVGraph(const std::string & filename, Graph<unsigned> & g, const char delimiter=';');
-void readCSVGraph(std::istream & f, Graph<unsigned> & g, const char delimiter=';');
+bool readCSVGraph(const std::string & filename, Graph<unsigned> & g, unsigned & cnt, const char delimiter=';');
+bool readCSVGraph(std::istream & f, Graph<unsigned> & g, unsigned & cnt, const char delimiter=';');
+bool readCSVGraph(const std::string & filename, Graph<unsigned> & g, const char delimiter=';');
+bool readCSVGraph(std::istream & f, Graph<unsigned> & g, const char delimiter=';');
