@@ -222,23 +222,51 @@ $\alpha|V| + |V|\log|V| = |V|\left(\alpha+\log|V|\right)$
 		set style line 2 pt 5 lc rgb "#a009e73"
 		set style line 3 pt 5 lc rgb "#e69f00"
 		set style line 7 pt 5 lc rgb "#56b4e9"
-		
-		f1(x) = 0.1*a*x+b*x*log(x)
-		fit f1(x) "../out/gnp2_42_01.csv" u 1:($3/stons) via a, b
-		
+				
 		set xlabel "$|V|$"
 		set ylabel "$t (ms)$"
 
 		plot [0:xmax] [0:ymax] \
 			"../out/gnp2_42_01.csv" u 1:($3/stons) w dots ls 1 notitle, \
 			1/0 ls 1 lw 10 w p t "$\\alpha=0.01$", \
-			f1(x) title "f1(x)" w lines
-			# "../out/gnp2_42_05.csv" u 1:($3/stons) w dots ls 2 notitle, \
-			# 1/0 ls 2 lw 10 w p t "$\\alpha=0.05$", \
-			# "../out/gnp2_42_1.csv" u 1:($3/stons) w dots ls 3 notitle, \
-			# 1/0 ls 3 lw 10 w p t "$\\alpha=0.10$", \
-			# "../out/gnp2_42_2.csv" u 1:($3/stons) w dots ls 7 notitle, \
-			# 1/0 ls 7 lw 10 w p t "$\\alpha=0.20$, \
+			"../out/gnp2_42_05.csv" u 1:($3/stons) w dots ls 2 notitle, \
+			1/0 ls 2 lw 10 w p t "$\\alpha=0.05$", \
+			"../out/gnp2_42_1.csv" u 1:($3/stons) w dots ls 3 notitle, \
+			1/0 ls 3 lw 10 w p t "$\\alpha=0.10$", \
+			"../out/gnp2_42_2.csv" u 1:($3/stons) w dots ls 7 notitle, \
+			1/0 ls 7 lw 10 w p t "$\\alpha=0.20$"
+	\end{gnuplot}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\begin{gnuplot}[terminal=epslatex, terminaloptions=color]	
+	xmax = 6000
+	ymax = 20
+	stons = 10**6
+	set datafile separator comma
+	
+	set style line 1 pt 5 lc rgb "#e51e10"
+	set style line 2 pt 5 lc rgb "#a009e73"
+	set style line 3 pt 5 lc rgb "#e69f00"
+	set style line 7 pt 5 lc rgb "#56b4e9"
+	 
+	f01(x) = 0.01*a01*x+b01*x*log(x)
+	f05(x) = 0.05*a05*x+b05*x*log(x)
+	f10(x) = 0.10*a10*x+b10*x*log(x)
+	f20(x) = 0.20*a20*x+b20*x*log(x)
+	
+	fit f01(x) "../out/gnp2_42_01.csv" u 1:($3/stons) via a01, b01
+	fit f05(x) "../out/gnp2_42_05.csv" u 1:($3/stons) via a05, b05
+	fit f10(x) "../out/gnp2_42_1.csv" u 1:($3/stons) via a10, b10
+	fit f20(x) "../out/gnp2_42_2.csv" u 1:($3/stons) via a20, b20
+	save fit "main-fit"
+	
+	plot [0:xmax] [0:ymax] \
+		f01(x) t "$\\alpha=0.01$" w lines ls 1, \
+		f05(x) t "$\\alpha=0.05$" w lines ls 2, \
+		f10(x) t "$\\alpha=0.10$" w lines ls 3, \
+		f20(x) t "$\\alpha=0.20$" w lines ls 7
 	\end{gnuplot}
 \end{figure}
 

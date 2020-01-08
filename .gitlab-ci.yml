@@ -31,7 +31,7 @@ build pdf:
         paths:
             - 01Dijkstra/tex/main.pdf
     before_script:
-        - apk add make texlive-full python3 py-pip
+        - apk add make texlive-full python3 py-pip gnuplot
         - pip install pygments
     script:
         - cd 01Dijkstra/tex
